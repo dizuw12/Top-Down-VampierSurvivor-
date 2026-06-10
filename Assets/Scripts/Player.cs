@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -7,6 +8,14 @@ public class Player : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 MoveInput;
+    private SpriteRenderer rbSprite;
+
+    [Header("Zdrowie")]
+    [SerializeField] private int maxHp = 100;
+    [SerializeField] private float iFrameCooldown = 1f;
+    private int currentHp;
+    private float iFrameCooldownCounter;
+    private bool isattacked;
 
     [Header("Ustawienia postaci")]
     [SerializeField] private float MoveSpeed = 5f;
@@ -23,6 +32,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float attackTime = 0.6f;
     [SerializeField] private int attackdamage = 10;
     [SerializeField] private LayerMask enemyLayers;
+
+    private float blinkTime = 1f;
+    private Color basicColor;
     private bool isattacking;
     private float attackCooldownCounter;
     private float dashCooldownCounter;
@@ -34,7 +46,10 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+       rbSprite = GetComponent<SpriteRenderer>();
        rb = GetComponent<Rigidbody2D>();
+       currentHp = maxHp;
+        basicColor = rbSprite.color;
 
     }
 
@@ -44,7 +59,9 @@ public class Player : MonoBehaviour
         HandleInput();
         Movment();
         DashCooldownCounter();
-       
+        IFrameCooldownHandle();
+
+
 
     }
 
@@ -131,6 +148,15 @@ public class Player : MonoBehaviour
         }
         
     }
+    private void IFrameCooldownHandle()
+    {
+        if (isattacked)
+        {
+            iFrameCooldownCounter -= Time.deltaTime;
+            if (iFrameCooldownCounter <= 0)
+                isattacked = false;
+        }
+    }
 
     private void Dash()
     {
@@ -163,6 +189,27 @@ public class Player : MonoBehaviour
             if (enemyScript != null)
                 enemyScript.TakeDamage(attackdamage, lastMoveInput);
         }
+    }
+    public void TakeDamage(int damage)
+    {
+        if (!isattacked && !isdashing)
+        {
+            StartCoroutine(BlinkCouroutine());
+            currentHp -= damage;
+            Debug.Log($"{gameObject.name} take {damage} damage!!!");
+            if (currentHp <= 0)
+                Debug.Log($"{gameObject.name} Die!!!");
+            isattacked = true;
+            iFrameCooldownCounter = iFrameCooldown;
+        }
+
+
+    }
+    private IEnumerator BlinkCouroutine()
+    {
+        rbSprite.color = Color.red;
+        yield return new WaitForSeconds(blinkTime);
+        rbSprite.color = basicColor;
     }
     
     private void OnDrawGizmos()

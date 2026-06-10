@@ -600,6 +600,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 30
   moveSpeed: 1
+  collisionDmg: 10
+  waitAfterAttack: 0.4
   knockbackForce: 8
   blinkDuration: 0.1
 --- !u!50 &1843053809
@@ -883,6 +885,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abaa9c01169468c40b0b41834a65180b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHp: 100
+  iFrameCooldown: 1
   MoveSpeed: 5
   DashPower: 15
   DashTime: 0.2

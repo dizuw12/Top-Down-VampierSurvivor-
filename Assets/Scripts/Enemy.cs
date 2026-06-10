@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 
 public class Enemy : MonoBehaviour
@@ -11,7 +11,10 @@ public class Enemy : MonoBehaviour
     [Header("Statystyki")]
     [SerializeField] private int maxHp = 30;
     [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private int collisionDmg = 10;
+    [SerializeField] private float waitAfterAttack = 0.2f;
     private int currentHp;
+    private bool attacked;
 
     [SerializeField] private float knockbackForce = 15f;
     private float knockbackTime = 0.15f;
@@ -38,11 +41,23 @@ public class Enemy : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (!isKnocked)
+
+        if (isKnocked)
+        {
+            return;
+        }
+
+        if (attacked)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+        else
         {
             Vector2 enemyDir = (playerTarget.position - transform.position).normalized;
             rb.linearVelocity = enemyDir * moveSpeed;
         }
+
+
     }
     public void TakeDamage(int damage, Vector2 hitDirection)
     {
@@ -63,6 +78,13 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(blinkDuration);
         spriteRen.color = basicColor;
     }
+    private IEnumerator AfterAttackCouroutine()
+    {
+        attacked = true;
+        yield return new WaitForSeconds(waitAfterAttack);
+        attacked = false;
+        
+    }
     private IEnumerator KnockBackCourotine(Vector2 knocbackDir)
     {
         isKnocked = true;
@@ -70,6 +92,19 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(knockbackTime);
         isKnocked = false;
         rb.linearVelocity = Vector2.zero;
+    }
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Player player = collision.gameObject.GetComponent<Player>();
+            if (player != null && !attacked && !isKnocked)
+            {
+                player.TakeDamage(collisionDmg);
+                StartCoroutine(AfterAttackCouroutine());
+
+            }
+        }
     }
     private void Die()
     {
