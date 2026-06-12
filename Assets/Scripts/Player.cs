@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     [Header("Zdrowie")]
     [SerializeField] private int maxHp = 100;
     [SerializeField] private float iFrameCooldown = 1f;
+    [SerializeField] private TextMeshProUGUI hpCounterText;
     private int currentHp;
     private float iFrameCooldownCounter;
     private bool isattacked;
@@ -106,6 +107,7 @@ public class Player : MonoBehaviour
             if (dashCounter <= 0)
             {
                 isdashing = false;
+                Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
             }
             return;
         }
@@ -167,6 +169,7 @@ public class Player : MonoBehaviour
         isdashing = true;
         dashCounter = DashTime;
         dashCooldownCounter = DashCooldown;
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true);
     }
     private void Attack()
     {
@@ -198,9 +201,10 @@ public class Player : MonoBehaviour
             currentHp -= damage;
             Debug.Log($"{gameObject.name} take {damage} damage!!!");
             if (currentHp <= 0)
-                Debug.Log($"{gameObject.name} Die!!!");
+                FindFirstObjectByType<GameManager>().GameOver();
             isattacked = true;
             iFrameCooldownCounter = iFrameCooldown;
+            hpCounterText.text = currentHp.ToString();
         }
 
 

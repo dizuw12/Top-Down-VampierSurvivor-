@@ -110,5 +110,6 @@ public class Enemy : MonoBehaviour
     {
         Debug.Log($"{gameObject.name} Die!!");
         Destroy(gameObject);
+        FindFirstObjectByType<GameManager>().AddKill();
     }
 }
